@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Gallery Moderation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="hud">
+  <span class="rec">Rec</span>
+  <span class="title">Gallery moderation</span>
+  <nav><a href="./">Back to gallery</a><a href="#" id="logout" hidden>Sign out</a></nav>
+</header>
+
+<main>
+  <section id="login" class="hero" hidden>
+    <h1>Sign in</h1>
+    <p>Moderators only.</p>
+    <form id="login-form" class="dlg-body" style="padding:0;max-width:380px">
+      <label class="field">Email <input id="email" type="email" autocomplete="username" required></label>
+      <label class="field">Password <input id="password" type="password" autocomplete="current-password" required></label>
+      <p class="msg" id="login-msg" role="status"></p>
+      <div class="actions"><button class="btn primary" type="submit">Sign in</button></div>
+    </form>
+  </section>
+
+  <section id="panel" hidden>
+    <div class="tabs">
+      <button class="chip" type="button" data-tab="pending" aria-pressed="true">Waiting</button>
+      <button class="chip" type="button" data-tab="approved" aria-pressed="false">Approved</button>
+      <span class="msg" id="count"></span>
+    </div>
+    <div class="mod-grid" id="list"></div>
+    <p class="status" id="status"></p>
+  </section>
+</main>
+
+<dialog id="viewer" aria-label="Photo">
+  <div class="dlg-head"><span>Full size</span><button class="x" type="button" data-close aria-label="Close">×</button></div>
+  <img id="viewer-img" alt="">
+</dialog>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.min.js"></script>
+<script src="config.js"></script>
+<script src="moderate.js"></script>
+</body>
+</html>

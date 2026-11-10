@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RECORDING In Progress Gallery</title>
+<meta name="description" content="Photos taken by players with the RECORDING In Progress camera mod for Minecraft.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="hud">
+  <span class="rec">Rec</span>
+  <span class="title">RECORDING In Progress</span>
+  <span class="sep">/ Photo gallery</span>
+  <nav>
+    <a id="lnk-modrinth" href="#">Modrinth</a>
+    <a id="lnk-github" href="#">GitHub</a>
+  </nav>
+</header>
+
+<main>
+  <section class="hero">
+    <h1>Shot on RECORDING In Progress</h1>
+    <p>Photos taken by players with the in-game camera. Long exposures, fisheyes, flash shots, selfies, falling trees, ragdolls: share your best one.</p>
+    <p>Your photos are saved in <code>.minecraft/RECORDING In Progress/photos</code>.</p>
+    <div class="actions">
+      <button class="btn primary" id="open-upload" type="button">Upload a photo</button>
+    </div>
+  </section>
+
+  <div class="chips" id="chips" role="group" aria-label="Filter by tag"></div>
+  <div class="grid" id="grid"></div>
+  <p class="status" id="status">Loading photos…</p>
+  <div class="more"><button class="btn" id="more" type="button" hidden>Load more</button></div>
+</main>
+
+<footer>Every photo is checked before it appears here. Made for the RECORDING In Progress Minecraft mod.</footer>
+
+<!-- upload -->
+<dialog id="upload" aria-labelledby="upload-title">
+  <form id="upload-form" method="dialog">
+    <div class="dlg-head"><span id="upload-title">Upload a photo</span><button class="x" type="button" data-close aria-label="Close">×</button></div>
+    <div class="dlg-body">
+      <label class="drop" id="drop">
+        <input id="file" type="file" accept="image/png,image/jpeg,image/webp" hidden>
+        <span>Click to choose a photo, or drop it here</span>
+        <small>PNG, JPG or WebP</small>
+      </label>
+      <label class="field">Your name (shown under the photo)
+        <input id="author" type="text" maxlength="40" placeholder="Anonymous" autocomplete="nickname">
+      </label>
+      <label class="field">Caption (optional)
+        <textarea id="caption" maxlength="200" placeholder="Where, what settings, what happened…"></textarea>
+      </label>
+      <div class="field">What's in it? (optional)
+        <div class="chips" id="upload-tags" style="padding:4px 0 0"></div>
+      </div>
+      <label class="check"><input id="own" type="checkbox"> This is my own Minecraft screenshot, and I'm happy for it to be shown here and in videos about the mod.</label>
+      <p class="note">Photos appear once they've been checked. Big images are shrunk to 1920 px before uploading.</p>
+      <p class="msg" id="upload-msg" role="status"></p>
+      <div class="actions">
+        <button class="btn primary" id="send" type="submit" disabled>Upload</button>
+        <button class="btn" type="button" data-close>Cancel</button>
+      </div>
+    </div>
+  </form>
+</dialog>
+
+<!-- viewer -->
+<dialog id="viewer" aria-label="Photo">
+  <div class="dlg-head"><span id="viewer-title">Photo</span><button class="x" type="button" data-close aria-label="Close">×</button></div>
+  <img id="viewer-img" alt="">
+  <div class="cap">
+    <div id="viewer-caption"></div>
+    <div class="by" id="viewer-by"></div>
+    <div class="tagline" id="viewer-tags"></div>
+  </div>
+</dialog>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.min.js"></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

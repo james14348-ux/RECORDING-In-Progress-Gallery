@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=3">
+<link rel="stylesheet" href="style.css?v=4">
 </head>
 <body>
 <header class="hud">
@@ -63,7 +63,7 @@
         <textarea id="caption" maxlength="200" placeholder="Where, what settings, what happened…"></textarea>
       </label>
       <div class="field">What's in it? (optional)
-        <div class="chips" id="upload-tags" style="padding:4px 0 0"></div>
+        <div id="upload-tags" style="display:grid;padding:4px 0 0"></div>
       </div>
       <label class="check"><input id="own" type="checkbox"> This is my own Minecraft screenshot, and I'm happy for it to be shown here and in videos about the mod.</label>
       <p class="note">Photos appear once they've been checked. Big images are shrunk to 1920 px before uploading.</p>
@@ -84,11 +84,12 @@
     <div id="viewer-caption"></div>
     <div class="by-row"><span class="by" id="viewer-by"></span><span id="viewer-like"></span></div>
     <div class="tagline" id="viewer-tags"></div>
+    <div class="mod-tools" id="viewer-mod" hidden></div>
   </div>
 </dialog>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.min.js"></script>
-<script src="config.js?v=3"></script>
-<script src="app.js?v=3"></script>
+<script src="config.js?v=4"></script>
+<script src="app.js?v=4"></script>
 </body>
 </html>

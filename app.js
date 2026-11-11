@@ -2,6 +2,8 @@
   const C = window.GALLERY_CONFIG;
   const $ = (id) => document.getElementById(id);
   const PAGE = 24;
+  const MAX_TAGS = 8;
+  const ALL_TAGS = C.tagGroups.flatMap((g) => g.tags);
 
   // A random id for this browser, so each person can like a photo once.
   const voter = (() => {
@@ -33,12 +35,15 @@
   }
 
   const filterChips = $("chips");
-  [null, ...C.tags].forEach((t) => {
-    filterChips.append(chip(t ?? "All", t === null, (b) => {
-      filter = t;
-      filterChips.querySelectorAll(".chip").forEach((c) => c.setAttribute("aria-pressed", String(c === b)));
-      reload();
-    }));
+  const filterChip = (t) => chip(t ?? "All", t === null, (b) => {
+    filter = t;
+    filterChips.querySelectorAll(".chip").forEach((c) => c.setAttribute("aria-pressed", String(c === b)));
+    reload();
+  });
+  filterChips.append(filterChip(null));
+  C.tagGroups.forEach((g) => {
+    const sep = document.createElement("span"); sep.className = "chip-sep"; sep.setAttribute("aria-hidden", "true");
+    filterChips.append(sep, ...g.tags.map(filterChip));
   });
 
   document.querySelectorAll("#sort [data-sort]").forEach((b) => b.addEventListener("click", () => {
@@ -66,9 +71,11 @@
     $("status").hidden = false;
     try {
       let q = sb.from("photos")
-        .select("id,path,author,caption,tags,width,height,created_at,approved_at,like_count")
+        .select("id,path,author,caption,tags,width,height,created_at,approved_at,like_count,pinned_at")
         .eq("status", "approved");
       if (filter) q = q.contains("tags", [filter]);
+      // Pinned photos first (newest pin on top), in "All" and in every tag they have.
+      q = q.order("pinned_at", { ascending: false, nullsFirst: false });
       if (sort === "liked") q = q.order("like_count", { ascending: false }).order("approved_at", { ascending: false });
       else q = q.order("approved_at", { ascending: sort === "old" });
       const { data, error } = await q.order("id").range(offset, offset + PAGE - 1);
@@ -169,14 +176,23 @@
     const meta = document.createElement("figcaption"); meta.className = "meta";
     meta.textContent = p.author + (p.caption ? " — " + p.caption : "");
     fig.append(img, frame, meta, likeButton(entry));
+    if (p.pinned_at) {
+      fig.classList.add("pinned");
+      const badge = document.createElement("span"); badge.className = "pin-badge"; badge.innerHTML = PIN + "Pinned";
+      fig.append(badge);
+    }
+    entry.tile = fig;
     const open = () => view(entry);
     fig.addEventListener("click", open);
     fig.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(); } });
     return fig;
   }
 
+  const PIN = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 3l6 6-3 1-4 4 1 5-2 2-4-4-5 5H3v-1l5-5-4-4 2-2 5 1 4-4z"/></svg>';
+
   let viewerButton = null;
   function view(entry) {
+    modTools(entry);
     const { p, url } = entry;
     $("viewer-img").src = url;
     $("viewer-img").alt = p.caption || `Photo by ${p.author}`;
@@ -194,6 +210,64 @@
     $("viewer").showModal();
   }
 
+  // ------------------------------------------------------------ moderator tools
+  // If this browser is signed in on moderate.html, the photo viewer also gets Pin, Hide and Delete buttons.
+  // The database rules decide what's allowed; these buttons just save a trip to the moderation page.
+  let mod = null;
+  (async () => {
+    try {
+      const key = `sb-${new URL(C.supabaseUrl).hostname.split(".")[0]}-auth-token`;
+      if (!localStorage.getItem(key)) return;
+      const client = window.supabase.createClient(C.supabaseUrl, C.supabaseKey);
+      const { data: { session } } = await client.auth.getSession();
+      if (!session) return;
+      const { data: ok } = await client.rpc("is_admin");
+      if (ok) mod = client;
+    } catch (_) { /* not a moderator */ }
+  })();
+
+  function modButton(label, cls, fn) {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "btn " + cls; b.textContent = label;
+    b.addEventListener("click", async () => {
+      b.disabled = true;
+      try { await fn(); } catch (err) { console.error(err); alert("That didn't work: " + (err.message || err)); }
+      finally { b.disabled = false; }
+    });
+    return b;
+  }
+
+  function modTools(entry) {
+    const box = $("viewer-mod");
+    box.hidden = !mod;
+    if (!mod) return;
+    const { p } = entry;
+    const gone = () => { entry.tile?.remove(); photos.delete(p.id); $("viewer").close(); };
+    const label = document.createElement("span"); label.className = "msg"; label.textContent = "Moderator:";
+    box.replaceChildren(
+      label,
+      modButton(p.pinned_at ? "Unpin" : "Pin to top", "", async () => {
+        const { error } = await mod.from("photos").update({ pinned_at: p.pinned_at ? null : new Date().toISOString() }).eq("id", p.id);
+        if (error) throw error;
+        $("viewer").close();
+        reload();
+      }),
+      modButton("Hide", "", async () => {
+        const { error } = await mod.from("photos").update({ status: "pending" }).eq("id", p.id);
+        if (error) throw error;
+        gone();
+      }),
+      modButton("Delete", "danger", async () => {
+        if (!confirm("Delete this photo for good?")) return;
+        const rm = await mod.storage.from(C.bucket).remove([p.path]);
+        if (rm.error) throw rm.error;
+        const { error } = await mod.from("photos").delete().eq("id", p.id);
+        if (error) throw error;
+        gone();
+      }),
+    );
+  }
+
   $("more").addEventListener("click", load);
   document.querySelectorAll("[data-close]").forEach((b) => b.addEventListener("click", () => b.closest("dialog").close()));
   document.querySelectorAll("dialog").forEach((d) => d.addEventListener("click", (e) => { if (e.target === d) d.close(); }));
@@ -202,10 +276,17 @@
   let picked = null; // { blob, type, ext, width, height }
   const chosenTags = new Set();
   const tagBox = $("upload-tags");
-  C.tags.forEach((t) => tagBox.append(chip(t, false, (b) => {
-    if (chosenTags.has(t)) chosenTags.delete(t); else chosenTags.add(t);
-    b.setAttribute("aria-pressed", String(chosenTags.has(t)));
-  })));
+  C.tagGroups.forEach((g) => {
+    const row = document.createElement("div"); row.className = "tag-group";
+    const name = document.createElement("span"); name.className = "tag-group-name"; name.textContent = g.name;
+    row.append(name, ...g.tags.map((t) => chip(t, false, (b) => {
+      if (chosenTags.has(t)) chosenTags.delete(t);
+      else if (chosenTags.size < MAX_TAGS) chosenTags.add(t);
+      else { msg(`Up to ${MAX_TAGS} tags per photo.`, "err"); return; }
+      b.setAttribute("aria-pressed", String(chosenTags.has(t)));
+    })));
+    tagBox.append(row);
+  });
 
   try { $("author").value = localStorage.getItem("gallery-author") || ""; } catch (_) {}
 
@@ -275,7 +356,7 @@
       const up = await sb.storage.from(C.bucket).upload(path, picked.blob, { contentType: picked.type, upsert: false });
       if (up.error) throw up.error;
       const ins = await sb.from("photos").insert({
-        path, author, caption, tags: [...chosenTags], width: picked.width, height: picked.height,
+        path, author, caption, tags: ALL_TAGS.filter((t) => chosenTags.has(t)), width: picked.width, height: picked.height,
       });
       if (ins.error) throw ins.error;
       msg("Thanks! Your photo will appear once it's been checked.", "good");

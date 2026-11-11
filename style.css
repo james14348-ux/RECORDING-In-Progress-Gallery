@@ -103,6 +103,23 @@ main { max-width: 1280px; margin: 0 auto; padding: 0 20px 64px; }
   font: 12px var(--mono); letter-spacing: .04em;
 }
 .chip[aria-pressed="true"] { background: var(--text); color: var(--bg); border-color: var(--text); }
+.chip-sep { width: 1px; align-self: stretch; margin: 2px 4px; background: var(--line); }
+.tag-group { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 3px 0; }
+.tag-group-name { width: 78px; font: 11px var(--mono); text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+
+/* ---------- pinned photos ---------- */
+.pin-badge {
+  position: absolute; top: 10px; left: 10px; z-index: 2;
+  display: inline-flex; align-items: center; gap: 5px; padding: 4px 9px 4px 7px; border-radius: 999px;
+  background: var(--accent); color: #1a1400; font: 700 11px/1 var(--mono); letter-spacing: .06em; text-transform: uppercase;
+}
+.pin-badge svg { width: 13px; height: 13px; fill: currentColor; }
+.shot.pinned::before { display: none; } /* the badge takes the top-left corner */
+.shot.pinned { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+/* ---------- moderator tools in the viewer ---------- */
+.mod-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 8px; padding-top: 10px; border-top: 1px dashed var(--line); }
+.mod-tools .btn { padding: 6px 12px; font-size: 13px; }
 
 /* ---------- photo grid ---------- */
 .grid { columns: 3 320px; column-gap: 14px; }

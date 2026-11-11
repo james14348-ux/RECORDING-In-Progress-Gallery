@@ -42,8 +42,10 @@
   async function load() {
     $("list").replaceChildren();
     $("status").textContent = "Loading…"; $("status").hidden = false;
-    const { data, error } = await sb.from("photos").select("*").eq("status", tab)
-      .order("created_at", { ascending: tab === "pending" }).limit(200);
+    let q = sb.from("photos").select("*").eq("status", tab);
+    if (tab === "pending") q = q.order("created_at", { ascending: true });
+    else q = q.order("pinned_at", { ascending: false, nullsFirst: false }).order("approved_at", { ascending: false });
+    const { data, error } = await q.limit(200);
     if (error) { $("status").textContent = "Couldn't load: " + error.message; return; }
     $("count").textContent = `${data.length} photo${data.length === 1 ? "" : "s"}${data.length === 200 ? " (first 200)" : ""}`;
     if (!data.length) { $("status").textContent = tab === "pending" ? "Nothing waiting. All caught up." : "No approved photos yet."; return; }
@@ -67,7 +69,8 @@
     const body = document.createElement("div"); body.className = "body";
     const by = document.createElement("div"); by.className = "msg";
     by.textContent = `${p.author} · ${new Date(p.created_at).toLocaleString()} · ${p.width}×${p.height}`
-      + (p.status === "approved" ? ` · ♥ ${p.like_count ?? 0}` : "");
+      + (p.status === "approved" ? ` · ♥ ${p.like_count ?? 0}` : "")
+      + (p.pinned_at ? " · PINNED" : "");
     const cap = document.createElement("div"); cap.textContent = p.caption || "(no caption)";
     if (!p.caption) cap.style.color = "var(--muted)";
     const tags = document.createElement("div"); tags.className = "tagline";
@@ -89,7 +92,14 @@
     };
 
     if (p.status === "pending") row.append(button("Approve", "ok", () => setStatus("approved")));
-    else row.append(button("Hide again", "", () => setStatus("pending")));
+    else {
+      row.append(button(p.pinned_at ? "Unpin" : "Pin to top", "", async () => {
+        const { error } = await sb.from("photos").update({ pinned_at: p.pinned_at ? null : new Date().toISOString() }).eq("id", p.id);
+        if (error) { alert("Couldn't update: " + error.message); return; }
+        load();
+      }));
+      row.append(button("Hide again", "", () => setStatus("pending")));
+    }
     row.append(button("Delete", "danger", remove));
 
     body.append(by, cap, tags, row);

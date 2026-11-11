@@ -171,7 +171,10 @@
     fig.setAttribute("aria-label", `Photo by ${p.author}${p.caption ? ": " + p.caption : ""}`);
     const img = document.createElement("img");
     img.src = url; img.loading = "lazy"; img.alt = p.caption || `Photo by ${p.author}`;
-    if (p.width && p.height) { img.width = p.width; img.height = p.height; }
+    if (p.width && p.height) {
+      img.width = p.width; img.height = p.height;
+      fig.style.setProperty("--ar", (p.width / p.height).toFixed(4));
+    }
     const frame = document.createElement("span"); frame.className = "frame";
     const meta = document.createElement("figcaption"); meta.className = "meta";
     meta.textContent = p.author + (p.caption ? " — " + p.caption : "");

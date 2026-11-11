@@ -66,7 +66,8 @@
     if (url) { img.src = url; img.addEventListener("click", () => { $("viewer-img").src = url; $("viewer").showModal(); }); }
     const body = document.createElement("div"); body.className = "body";
     const by = document.createElement("div"); by.className = "msg";
-    by.textContent = `${p.author} · ${new Date(p.created_at).toLocaleString()} · ${p.width}×${p.height}`;
+    by.textContent = `${p.author} · ${new Date(p.created_at).toLocaleString()} · ${p.width}×${p.height}`
+      + (p.status === "approved" ? ` · ♥ ${p.like_count ?? 0}` : "");
     const cap = document.createElement("div"); cap.textContent = p.caption || "(no caption)";
     if (!p.caption) cap.style.color = "var(--muted)";
     const tags = document.createElement("div"); tags.className = "tagline";

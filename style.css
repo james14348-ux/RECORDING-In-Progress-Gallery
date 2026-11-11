@@ -8,6 +8,7 @@
   --rec: #ff3b30;
   --accent: #ffd34d;
   --ok: #4cd964;
+  --like: #ff4f9a;
   --mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
   --sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
   color-scheme: dark;
@@ -62,31 +63,40 @@ main { max-width: 1280px; margin: 0 auto; padding: 0 20px 64px; }
 /* ---------- sort + tag filter ---------- */
 .toolbar { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 12px 18px; padding: 8px 0 22px; }
 .toolbar .chips { padding: 0; flex: 1 1 400px; }
-.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: 3px; gap: 2px; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: 3px; gap: 2px; background: var(--bg); }
 .seg button {
-  cursor: pointer; border: 0; background: transparent; color: var(--muted);
-  padding: 5px 12px; border-radius: 999px; font: 12px var(--mono); letter-spacing: .04em;
+  cursor: pointer; border: 0; background: transparent; color: #d6d4cf;
+  padding: 6px 13px; border-radius: 999px; font: 12px var(--mono); letter-spacing: .04em;
 }
-.seg button[aria-pressed="true"] { background: var(--rec); color: #fff; }
+.seg button:hover { color: #fff; background: var(--panel-2); }
+.seg button[aria-pressed="true"] { background: var(--rec); color: #fff; font-weight: 700; }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; padding: 8px 0 22px; }
 
 /* ---------- like button ---------- */
 .like {
   display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
-  padding: 5px 10px; border-radius: 999px; border: 1px solid rgba(255, 255, 255, .18);
-  background: rgba(0, 0, 0, .55); color: #fff; font: 12px/1 var(--mono);
+  padding: 6px 11px; border-radius: 999px; border: 1px solid rgba(255, 255, 255, .25);
+  background: rgba(0, 0, 0, .6); color: #fff; font: 700 13px/1 var(--mono);
   backdrop-filter: blur(4px);
 }
-.like svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; }
-.like[aria-pressed="true"] { color: var(--rec); border-color: rgba(255, 59, 48, .5); }
+.like svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; }
+.like[aria-pressed="true"] { color: var(--like); border-color: var(--like); }
 .like[aria-pressed="true"] svg { fill: currentColor; }
-.like:hover { border-color: rgba(255, 255, 255, .45); }
+.like:hover { border-color: rgba(255, 255, 255, .6); }
+.like[aria-pressed="true"]:hover { border-color: var(--like); }
 .like.pop svg { animation: pop .3s ease-out; }
-@keyframes pop { 40% { transform: scale(1.35); } }
-.shot .like { position: absolute; right: 10px; bottom: 10px; z-index: 2; }
-.shot .meta { padding-right: 80px; }
+@keyframes pop { 40% { transform: scale(1.4); } }
+/* On a tile: pops up in the top-right corner on hover (always shown on touch screens). */
+.shot .like {
+  position: absolute; top: 10px; right: 10px; z-index: 2;
+  opacity: 0; transform: translateY(-4px); transition: opacity .15s, transform .15s;
+}
+.shot:hover .like, .shot:focus-within .like { opacity: 1; transform: none; }
+@media (hover: none) { .shot .like { opacity: 1; transform: none; } }
+/* In the expanded view: in the bar under the photo. */
 .by-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-#viewer .like { background: var(--panel-2); }
+#viewer .like { background: var(--panel-2); font-size: 14px; padding: 8px 14px; }
+#viewer .like svg { width: 18px; height: 18px; }
 .chip {
   cursor: pointer; padding: 6px 12px; border-radius: 999px;
   border: 1px solid var(--line); background: transparent; color: var(--muted);
@@ -107,7 +117,7 @@ main { max-width: 1280px; margin: 0 auto; padding: 0 20px 64px; }
   border: 2px solid rgba(255, 255, 255, .85); opacity: 0; transition: opacity .15s;
 }
 .shot::before { top: 10px; left: 10px; border-right: 0; border-bottom: 0; }
-.shot::after { top: 10px; right: 10px; border-left: 0; border-bottom: 0; }
+.shot::after { display: none; } /* the like button takes the top-right corner */
 .shot .frame::before { bottom: 10px; left: 10px; border-right: 0; border-top: 0; }
 .shot .frame::after { bottom: 10px; right: 10px; border-left: 0; border-top: 0; }
 .shot:hover::before, .shot:hover::after, .shot:hover .frame::before, .shot:hover .frame::after { opacity: 1; }

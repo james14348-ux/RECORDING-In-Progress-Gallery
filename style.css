@@ -18,6 +18,7 @@ body { background: var(--bg); color: var(--text); font: 15px/1.55 var(--sans); }
 a { color: inherit; }
 button, input, textarea { font: inherit; color: inherit; }
 img { display: block; max-width: 100%; }
+[hidden] { display: none !important; }
 
 /* ---------- viewfinder top bar ---------- */
 .hud {

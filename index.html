@@ -31,7 +31,14 @@
     </div>
   </section>
 
-  <div class="chips" id="chips" role="group" aria-label="Filter by tag"></div>
+  <div class="toolbar">
+    <div class="seg" id="sort" role="group" aria-label="Sort photos">
+      <button type="button" data-sort="new" aria-pressed="true">Newest</button>
+      <button type="button" data-sort="liked" aria-pressed="false">Most liked</button>
+      <button type="button" data-sort="old" aria-pressed="false">Oldest</button>
+    </div>
+    <div class="chips" id="chips" role="group" aria-label="Filter by tag"></div>
+  </div>
   <div class="grid" id="grid"></div>
   <p class="status" id="status">Loading photos…</p>
   <div class="more"><button class="btn" id="more" type="button" hidden>Load more</button></div>
@@ -75,7 +82,7 @@
   <img id="viewer-img" alt="">
   <div class="cap">
     <div id="viewer-caption"></div>
-    <div class="by" id="viewer-by"></div>
+    <div class="by-row"><span class="by" id="viewer-by"></span><span id="viewer-like"></span></div>
     <div class="tagline" id="viewer-tags"></div>
   </div>
 </dialog>

@@ -13,5 +13,4 @@ window.GALLERY_CONFIG = {
     { name: "Mods", tags: ["Trealism", "Getting Up"] },
   ],
   modrinth: "https://modrinth.com/project/dzl9xQJA",
-  github: "https://github.com/james14348-ux/RECORDING-In-Progress",
 };

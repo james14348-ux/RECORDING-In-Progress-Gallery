@@ -20,7 +20,6 @@
   });
 
   $("lnk-modrinth").href = C.modrinth;
-  $("lnk-github").href = C.github;
 
   // ------------------------------------------------------------ gallery state
   let offset = 0, filter = null, sort = "new", loading = false, generation = 0;
